@@ -33,6 +33,7 @@ Tested successfully with three simultaneous batteries.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python3 litime_reader.py --help
 ```
 
 
