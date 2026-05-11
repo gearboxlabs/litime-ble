@@ -46,3 +46,5 @@ htmlcov/
 *.tmp
 *.swp
 
+# AI tools :P
+copilot-instructions.md
