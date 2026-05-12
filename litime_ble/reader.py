@@ -91,9 +91,6 @@ async def poll_battery(
                     await asyncio.sleep(interval)
 
         except BleakError as e:
-            print(
-                "Bluetooth error: make sure Bluetooth is enabled and this program is allowed to use it."
-            )
             if output == "human":
                 print(f"Error reading {battery.name}: {e}")
                 print(f"Retrying {battery.name} in 10 seconds...")
