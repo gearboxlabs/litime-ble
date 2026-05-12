@@ -34,20 +34,22 @@ pip install -r requirements.txt
 ./bin/litime-reader --list-batteries
 
 # Read battery data
-./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX"
+./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --once
 
 # Continuous monitoring
-./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --poll
+./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" 
 ```
 
 ## CLI Options
 
-- `--list-batteries`: Scan and list all visible LiTime batteries
-- `--battery-name NAME`: Connect to battery by advertised name
-- `--address ADDRESS`: Connect to battery by Bluetooth address
-- `--poll`: Continuously poll battery (30-second intervals)
-- `--format FORMAT`: Output format (human/json/csv)
-- `--help`: Show complete help
+  - --list-batteries      : Print discovered LiTime battery names only and exit.
+  - --output {human,json,rawjson} : Output format. Use json for parsed rows, rawjson for packet analysis.
+  - --interval INTERVAL :  Polling interval in seconds.
+  - --scan-timeout SCAN_TIMEOUT : BLE scan timeout in seconds.
+  - --read-timeout READ_TIMEOUT : Timeout for one-shot reads.
+  - --once                : Read one state from each visible battery and exit.
+  - --battery-name BATTERY_NAME : Filter visible batteries by name substring.
+  - --address ADDRESS     : Filter visible batteries by Bluetooth address.
 
 ## Output Formats
 
