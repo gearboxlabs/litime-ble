@@ -1,0 +1,7 @@
+Copyright (c) 2026 Gabriel Cain
+
+This project contains independently developed software and documentation
+for interoperability with select LiTime Bluetooth-enabled batteries.
+
+This project is unaffiliated with LiTime and does not contain or
+redistribute proprietary LiTime firmware or application binaries.

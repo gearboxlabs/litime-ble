@@ -1,53 +1,97 @@
-# LiTime<->BLE Overview
+# BLE Protocol Details
 
-# Current Understanding
+## Overview
 
-The battery appears to implement:
+The battery implements a custom BLE telemetry protocol using UART-style transport over FFE0/FFE1/FFE2 characteristics. The protocol does NOT appear to be directly compatible with standard DALY or JBD/Xiaoxiang protocols, although some structural similarities may exist.
 
-- a custom BLE telemetry protocol
-- UART-style BLE transport over FFE0/FFE1/FFE2
-- periodic polling request/response telemetry
+## Known Tested Hardware
 
-The protocol does NOT appear to be directly compatible with:
-
-- standard DALY protocol
-- standard JBD/Xiaoxiang protocol
-
-although some structural similarities may exist.
-
-# Project Goals
-
-This project aims to:
-
-1. Reverse engineer and document the Bluetooth Low Energy (BLE) protocol used by LiTime smart batteries.
-2. Build open-source tooling for reading and monitoring battery telemetry.
-3. Integrate LiTime batteries into external ecosystems such as Victron Venus OS / Cerbo GX.
-4. Develop an independent iOS application with functionality beyond the official LiTime application.
-5. Provide long-term interoperability and telemetry access independent of vendor software quality.
-
-
-# Known Tested Hardware
-
-## Battery
+### Battery
 
 - LiTime 230Ah Smart Bluetooth LiFePO4 Battery
-- Serial number:
+- Serial number: `BDLY12230-XXX-XXXXXXXXX-XXX`
 
-```text
-BDLY12230-bnn-b730171Z-150R
-```
+### BLE Device Name
 
-## BLE Device Name
+Observed advertisement: `L-12230XXX-XXXXXXX`
 
-Observed advertisement:
-
-```text
-L-12230BNN150-B00756
-```
-
-## Host Platform
+### Host Platform
 
 - Apple macOS Tahoe 26.3
+- Python 3.9+
+- Bleak BLE library
+
+## BLE Discovery
+
+### BLE Advertisement
+
+Observed advertisement data:
+
+```text
+Service UUID:
+0000ffe0-0000-1000-8000-00805f9b34fb
+```
+
+### Device Information Service
+
+Observed device information:
+
+| Field | Value |
+|---|---|
+| Manufacturer | BEKEN SAS |
+| Model | BK-BLE-1.0 |
+| Firmware | 6.1.2 |
+| Software | 6.3.0 |
+
+**Note:** The "BEKEN" identifiers appear to refer to the BLE module vendor rather than the BMS manufacturer.
+
+## GATT Layout
+
+### Primary Telemetry Service
+
+#### Service UUID
+
+```text
+0000ffe0-0000-1000-8000-00805f9b34fb
+```
+
+#### Characteristics
+
+| UUID | Properties | Purpose |
+|---|---|---|
+| FFE1 | notify/write | Telemetry receive channel |
+| FFE2 | write | Command transmit channel |
+| FFE3 | notify/write | Unknown / control channel |
+
+Additional custom services exist but have not yet been fully characterized.
+
+## Working BLE Communication
+
+### Command Channel
+
+Write commands to:
+
+```text
+0000ffe2-0000-1000-8000-00805f9b34fb
+```
+
+### Notification Channel
+
+Subscribe to notifications from:
+
+```text
+0000ffe1-0000-1000-8000-00805f9b34fb
+```
+
+### Working Telemetry Request
+
+Known working telemetry request:
+
+```hex
+00 00 04 01 13 55 aa 17
+```
+
+This command returns a 105-byte telemetry payload.
 - Python 3.9+
 - Bleak BLE library
 

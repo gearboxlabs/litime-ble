@@ -1,6 +1,15 @@
-# Future Goals
+# Project Goals
 
-## Protocol Reverse Engineering
+This project aims to:
+
+1. Reverse engineer and document the Bluetooth Low Energy (BLE) protocol used by LiTime smart batteries.
+2. Build open-source tooling for reading and monitoring battery telemetry.
+3. Integrate LiTime batteries into external ecosystems such as Victron Venus OS / Cerbo GX.
+4. Provide long-term interoperability and telemetry access independent of vendor software quality.
+
+## Future Goals
+
+### Protocol Reverse Engineering
 
 - identify additional packet types
 - identify alarm/status bits
@@ -9,7 +18,7 @@
 - identify charge/discharge enable state
 - identify protection/fault fields
 
-## Victron Energy Software Development
+### Victron Energy Software Development
 
 - stable Python telemetry daemon
 - MQTT bridge
@@ -20,7 +29,7 @@
 - historical telemetry database
 - battery fleet monitoring
 
-## Advanced Goals
+### Advanced Goals
 
 - multi-battery aggregation
 - series/parallel pack abstraction
