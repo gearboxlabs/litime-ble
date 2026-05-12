@@ -1,5 +1,6 @@
 # LiTime BLE Battery Monitor
 
+![Example output](ble-litime-ex.jpg)
 Open-source interoperability with LiTime smart batteries through reverse-engineered Bluetooth Low Energy protocol.
 
 **Credits**: This work builds upon the reverse engineering efforts of [chadj/litime-bluetooth-battery](https://github.com/chadj/litime-bluetooth-battery/).
