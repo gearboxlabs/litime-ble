@@ -1,4 +1,4 @@
-# LiTime BLE Battery Monitor
+# GBL LiTime BLE Battery Monitor
 
 ![Example output](ble-litime-ex.jpg)
 Open-source interoperability with LiTime smart batteries through reverse-engineered Bluetooth Low Energy protocol.
@@ -18,7 +18,7 @@ Open-source interoperability with LiTime smart batteries through reverse-enginee
 ```bash
 # Clone repository
 git clone <repository-url>
-cd litime-ble
+cd gbl-litime-ble
 
 # Create virtual environment
 python3 -m venv .venv
@@ -86,7 +86,7 @@ timestamp,battery_name,total_voltage,cell1,cell2,cell3,cell4
 ## Python API
 
 ```python
-from litime_ble import BatteryState, poll_battery, list_batteries
+from gbl_litime_ble import BatteryState, poll_battery, list_batteries
 
 # List batteries
 batteries = list_batteries()

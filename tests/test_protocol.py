@@ -2,8 +2,8 @@ import json
 import unittest
 from pathlib import Path
 
-from litime_ble.protocol import parse_debug_packet, parse_packet
-from litime_ble.scanner import LiTimeBattery
+from gbl_litime_ble.protocol import parse_debug_packet, parse_packet
+from gbl_litime_ble.scanner import LiTimeBattery
 
 
 class ProtocolTest(unittest.TestCase):

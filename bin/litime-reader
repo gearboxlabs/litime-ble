@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
+"""LiTime BLE battery reader CLI tool."""
 
-import sys
-from pathlib import Path
-
-root_dir = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(root_dir))
-
-from litime_ble.cli import main
+from gbl_litime_ble.cli import main
 
 if __name__ == "__main__":
     main()

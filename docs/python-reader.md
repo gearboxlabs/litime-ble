@@ -77,7 +77,7 @@ Examples:
 ## API Usage
 
 ```python
-from litime_ble import BatteryState, poll_battery, list_batteries
+from gbl_litime_ble import BatteryState, poll_battery, list_batteries
 
 # List available batteries
 batteries = list_batteries()

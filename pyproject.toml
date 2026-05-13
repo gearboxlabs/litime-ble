@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gbl-litime-ble"
+version = "0.1.0"
+description = "Open-source interoperability with LiTime smart batteries through reverse-engineered Bluetooth Low Energy protocol"
+readme = "docs/README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Gabriel Cain" }
+]
+keywords = ["litime", "battery", "ble", "bluetooth", "telemetry"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "bleak>=0.22.0,<1.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+litime-reader = "gbl_litime_ble.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/your-org/gbl-litime-ble"
+Documentation = "https://github.com/your-org/gbl-litime-ble/tree/main/docs"
+Repository = "https://github.com/your-org/gbl-litime-ble.git"
+Issues = "https://github.com/your-org/gbl-litime-ble/issues"
+
+[tool.setuptools]
+packages = ["gbl_litime_ble"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=gbl_litime_ble --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["gbl_litime_ble"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

@@ -1,4 +1,4 @@
-# LiTime BLE Battery Protocol Documentation
+# GBL LiTime BLE Battery Protocol Documentation
 
 This project provides open-source interoperability with LiTime smart batteries through reverse-engineered Bluetooth Low Energy (BLE) protocol implementation.
 
