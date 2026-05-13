@@ -1,12 +1,13 @@
 import asyncio
 import json
 from dataclasses import asdict
-from typing import Dict
+from datetime import timezone
+from typing import Dict, Optional
 
 from bleak import BleakClient
 from bleak.exc import BleakError
 
-from .protocol import BatteryState, parse_debug_packet, parse_packet
+from .protocol import BatteryState, parse_debug_packet, parse_packet, parse_timezone
 from .scanner import LiTimeBattery, scan_litime_batteries
 
 
@@ -46,7 +47,15 @@ def print_json(state: BatteryState) -> None:
     print(json.dumps(asdict(state), separators=(",", ":")), flush=True)
 
 
-def emit_state(state, output: str) -> None:
+def write_log_line(state: BatteryState, log_path: str) -> None:
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write(json.dumps(asdict(state), separators=(",", ":")) + "\n")
+
+
+def emit_state(state, output: str, log_path: Optional[str] = None) -> None:
+    if isinstance(state, BatteryState) and log_path:
+        write_log_line(state, log_path)
+
     if output == "json":
         print_json(state)
     elif output == "rawjson":
@@ -59,6 +68,8 @@ async def poll_battery(
     battery: LiTimeBattery,
     interval: float,
     output: str,
+    log_path: Optional[str] = None,
+    tz: Optional[timezone] = None,
 ) -> None:
     while True:
         try:
@@ -71,14 +82,14 @@ async def poll_battery(
 
                 def notification_handler(sender, data):
                     if output == "rawjson":
-                        debug = parse_debug_packet(battery, data)
+                        debug = parse_debug_packet(battery, data, tz)
                         if debug:
-                            emit_state(debug, output)
+                            emit_state(debug, output, log_path)
                         return
 
-                    state = parse_packet(battery, data)
+                    state = parse_packet(battery, data, tz)
                     if state:
-                        emit_state(state, output)
+                        emit_state(state, output, log_path)
 
                 await client.start_notify("0000ffe1-0000-1000-8000-00805f9b34fb", notification_handler)
 
@@ -131,6 +142,7 @@ async def main_async(args) -> None:
 
     if args.once:
         states: Dict[str, BatteryState] = {}
+        tz = parse_timezone(args.log_timezone)
 
         async def one_packet(battery: LiTimeBattery) -> None:
             try:
@@ -138,7 +150,7 @@ async def main_async(args) -> None:
                     done = asyncio.Event()
 
                     def handler(sender, data):
-                        state = parse_packet(battery, data)
+                        state = parse_packet(battery, data, tz)
                         if state:
                             states[battery.address] = state
                             done.set()
@@ -161,16 +173,19 @@ async def main_async(args) -> None:
         for battery in batteries:
             state = states.get(battery.address)
             if state:
-                emit_state(state, args.output)
+                emit_state(state, args.output, args.log)
 
         return
 
+    tz = parse_timezone(args.log_timezone)
     tasks = [
         asyncio.create_task(
             poll_battery(
                 battery=battery,
                 interval=args.interval,
                 output=args.output,
+                log_path=args.log,
+                tz=tz,
             )
         )
         for battery in batteries

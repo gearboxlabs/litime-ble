@@ -56,6 +56,19 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--log",
+        type=str,
+        help="Write one JSON line per battery state to this file.",
+    )
+
+    parser.add_argument(
+        "--log-timezone",
+        type=str,
+        default="local",
+        help="Timezone for log timestamps: 'local' (system timezone, default), 'utc', named timezone (e.g., 'America/New_York'), or GMT offset (e.g., 'gmt+5').",
+    )
+
+    parser.add_argument(
         "--list-batteries",
         action="store_true",
         help="Print discovered LiTime battery names only and exit.",

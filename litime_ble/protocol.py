@@ -1,8 +1,57 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional
+from zoneinfo import ZoneInfo
 
 from .scanner import LiTimeBattery
+
+
+def parse_timezone(tz_spec: Optional[str]) -> Optional[timezone]:
+    """Parse timezone specification: 'local' (system timezone), 'utc', named zone (e.g., 'America/New_York'), or offset (e.g., 'gmt+5', 'gmt-8').
+    
+    Returns None for 'local' to signal that local system timezone should be used.
+    """
+    if not tz_spec:
+        return None
+
+    tz_lower = tz_spec.lower().strip()
+
+    # Local system timezone
+    if tz_lower == "local":
+        return None
+
+    # UTC
+    if tz_lower == "utc":
+        return timezone.utc
+
+    # GMT offset: gmt+5, gmt-8, etc.
+    if tz_lower.startswith("gmt"):
+        try:
+            offset_str = tz_lower[3:]
+            sign = 1 if offset_str[0] == "+" else -1
+            hours = int(offset_str[1:])
+            return timezone(timedelta(hours=sign * hours))
+        except (ValueError, IndexError):
+            raise ValueError(f"Invalid GMT offset format: {tz_spec}")
+
+    # Named timezone
+    try:
+        return ZoneInfo(tz_spec)
+    except Exception:
+        raise ValueError(f"Unknown timezone: {tz_spec}")
+
+
+def get_timestamp(tz: Optional[timezone] = None) -> str:
+    """Generate ISO format timestamp.
+    
+    If tz is None, uses system local timezone (default).
+    If tz is a timezone object, uses that timezone.
+    """
+    if tz is None:
+        # Local system timezone
+        return datetime.now().astimezone().isoformat(timespec="seconds")
+    else:
+        return datetime.now(tz).isoformat(timespec="seconds")
 
 
 @dataclass
@@ -27,19 +76,19 @@ class BatteryState:
     cycle_count: int
 
 
-def parse_packet(battery: LiTimeBattery, data: bytearray) -> Optional[BatteryState]:
+def parse_packet(battery: LiTimeBattery, data: bytearray, tz: Optional[timezone] = None) -> Optional[BatteryState]:
     if len(data) < 100:
         return None
 
-    voltage = int.from_bytes(data[12:16], "little") / 1000
-    current = int.from_bytes(data[48:52], "little", signed=True) / 1000
-    power = voltage * current
+    voltage = round(int.from_bytes(data[12:16], "little") / 1000, 3)
+    current = round(int.from_bytes(data[48:52], "little", signed=True) / 1000, 3)
+    power = round(voltage * current, 1)
 
     battery_temp = int.from_bytes(data[52:54], "little", signed=True)
     mosfet_temp = int.from_bytes(data[54:56], "little", signed=True)
 
-    remaining_ah = int.from_bytes(data[62:64], "little") / 100
-    full_capacity_ah = int.from_bytes(data[64:66], "little") / 100
+    remaining_ah = round(int.from_bytes(data[62:64], "little") / 100, 2)
+    full_capacity_ah = round(int.from_bytes(data[64:66], "little") / 100, 2)
 
     soc = int.from_bytes(data[90:92], "little")
     cycle_count = int.from_bytes(data[96:98], "little")
@@ -48,12 +97,12 @@ def parse_packet(battery: LiTimeBattery, data: bytearray) -> Optional[BatterySta
     for i in range(16, 48, 2):
         mv = int.from_bytes(data[i:i + 2], "little")
         if mv:
-            cells.append(mv / 1000)
+            cells.append(round(mv / 1000, 3))
 
     if cells:
         min_cell_voltage = min(cells)
         max_cell_voltage = max(cells)
-        cell_voltage_delta = max_cell_voltage - min_cell_voltage
+        cell_voltage_delta = round(max_cell_voltage - min_cell_voltage, 3)
         cell_voltage_delta_mv = round(cell_voltage_delta * 1000)
     else:
         min_cell_voltage = None
@@ -62,7 +111,7 @@ def parse_packet(battery: LiTimeBattery, data: bytearray) -> Optional[BatterySta
         cell_voltage_delta_mv = None
 
     return BatteryState(
-        timestamp=datetime.now().isoformat(timespec="seconds"),
+        timestamp=get_timestamp(tz),
         name=battery.name,
         address=battery.address,
         rssi=battery.rssi,
@@ -83,17 +132,17 @@ def parse_packet(battery: LiTimeBattery, data: bytearray) -> Optional[BatterySta
     )
 
 
-def parse_debug_packet(battery: LiTimeBattery, data: bytearray) -> Optional[dict]:
+def parse_debug_packet(battery: LiTimeBattery, data: bytearray, tz: Optional[timezone] = None) -> Optional[dict]:
     if len(data) < 100:
         return None
 
-    voltage = int.from_bytes(data[12:16], "little") / 1000
-    current = int.from_bytes(data[48:52], "little", signed=True) / 1000
-    remaining_ah = int.from_bytes(data[62:64], "little") / 100
-    full_capacity_ah = int.from_bytes(data[64:66], "little") / 100
+    voltage = round(int.from_bytes(data[12:16], "little") / 1000, 3)
+    current = round(int.from_bytes(data[48:52], "little", signed=True) / 1000, 3)
+    remaining_ah = round(int.from_bytes(data[62:64], "little") / 100, 2)
+    full_capacity_ah = round(int.from_bytes(data[64:66], "little") / 100, 2)
 
     calculated_soc = (
-        (remaining_ah / full_capacity_ah) * 100
+        round((remaining_ah / full_capacity_ah) * 100, 2)
         if full_capacity_ah > 0
         else None
     )
@@ -106,15 +155,15 @@ def parse_debug_packet(battery: LiTimeBattery, data: bytearray) -> Optional[dict
     for i in range(16, 48, 2):
         mv = int.from_bytes(data[i:i + 2], "little")
         if mv:
-            cells.append(mv / 1000)
+            cells.append(round(mv / 1000, 3))
 
     min_cell = min(cells) if cells else None
     max_cell = max(cells) if cells else None
-    cell_delta_v = (max_cell - min_cell) if cells else None
+    cell_delta_v = round(max_cell - min_cell, 3) if cells else None
     cell_delta_mv = round(cell_delta_v * 1000) if cell_delta_v is not None else None
 
     return {
-        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "timestamp": get_timestamp(tz),
         "name": battery.name,
         "address": battery.address,
         "rssi": battery.rssi,
@@ -123,7 +172,7 @@ def parse_debug_packet(battery: LiTimeBattery, data: bytearray) -> Optional[dict
         "raw_hex": data.hex(" "),
         "voltage_v": voltage,
         "current_a": current,
-        "power_w": voltage * current,
+        "power_w": round(voltage * current, 1),
         "battery_temp_c": int.from_bytes(data[52:54], "little", signed=True),
         "mosfet_temp_c": int.from_bytes(data[54:56], "little", signed=True),
         "remaining_ah": remaining_ah,

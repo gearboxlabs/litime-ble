@@ -37,8 +37,8 @@ pip install -r requirements.txt
 # Read battery data
 ./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --once
 
-# Continuous monitoring
-./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" 
+# Continuous monitoring with log output
+./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --log battery.log
 ```
 
 ## CLI Options
@@ -51,6 +51,8 @@ pip install -r requirements.txt
   - --once                : Read one state from each visible battery and exit.
   - --battery-name BATTERY_NAME : Filter visible batteries by name substring.
   - --address ADDRESS     : Filter visible batteries by Bluetooth address.
+  - --log LOG            : Write one JSON line per battery state to this file.
+  - --log-timezone TZ    : Timezone for log timestamps. Options: 'local' (system, default), 'utc', named zone (e.g., 'America/New_York'), or GMT offset (e.g., 'gmt+5').
 
 ## Output Formats
 

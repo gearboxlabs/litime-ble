@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ./bin/litime-reader --address "AA:BB:CC:DD:EE:FF"
 
 # Continuous polling (every 30 seconds)
-./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --poll
+./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX"
 ```
 
 ### Output Formats
@@ -46,6 +46,32 @@ The reader supports multiple output formats:
 
 # CSV output
 ./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --format csv
+
+# Write one JSON line per battery state to a log file
+./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --log battery.log
+
+# Log with specific timezone
+./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --log battery.log --log-timezone America/New_York
+
+# Log with GMT offset
+./bin/litime-reader --battery-name "L-12230XXX-XXXXXXX" --log battery.log --log-timezone gmt+5
+```
+
+## Logging and Timestamps
+
+The `--log` option writes one JSON line per battery state for easy parsing and archival. Timestamps are configurable with `--log-timezone`:
+
+- **local**: System local timezone (default)
+- **utc**: Coordinated Universal Time
+- **Named timezones**: IANA timezone names like `America/New_York`, `Europe/London`, `Australia/Sydney`
+- **GMT offsets**: Formats like `gmt+5`, `gmt-8` for fixed offsets from UTC
+
+Examples:
+```bash
+./bin/litime-reader --log data.log
+./bin/litime-reader --log data.log --log-timezone utc
+./bin/litime-reader --log data.log --log-timezone America/Los_Angeles
+./bin/litime-reader --log data.log --log-timezone gmt+9
 ```
 
 ## API Usage
